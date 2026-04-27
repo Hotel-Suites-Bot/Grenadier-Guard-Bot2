@@ -3,49 +3,53 @@ require('dotenv').config();
 const { Client, GatewayIntentBits, REST, Routes } = require('discord.js');
 
 const client = new Client({
-  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers]
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMembers
+  ]
 });
 
-// Load DB + events
-require('./db');
-require('./events/interactionCreate')(client);
+// =========================
+// SAFE IMPORTS (prevents crash)
+// =========================
+try {
+  require('./db');
+  require('./events/interactionCreate')(client);
+} catch (e) {
+  console.error('INIT ERROR:', e);
+}
 
 // =========================
-// SLASH COMMANDS (AUTO DEPLOY)
+// SLASH COMMANDS
 // =========================
-
 const commands = [
   {
     name: 'verify',
     description: 'Verify Roblox account',
-    options: [
-      {
-        name: 'username',
-        type: 3,
-        description: 'Roblox username',
-        required: true
-      }
-    ]
+    options: [{
+      name: 'username',
+      type: 3,
+      description: 'Roblox username',
+      required: true
+    }]
   },
   {
     name: 'bgc',
     description: 'Background check',
-    options: [
-      {
-        name: 'username',
-        type: 3,
-        description: 'Roblox username',
-        required: true
-      }
-    ]
+    options: [{
+      name: 'username',
+      type: 3,
+      description: 'Roblox username',
+      required: true
+    }]
   },
   {
     name: 'update',
-    description: 'Update roles and nickname'
+    description: 'Update roles'
   },
   {
     name: 'rankbind',
-    description: 'Create rankbind (group role → Discord roles + nickname)',
+    description: 'Create rankbind',
     options: [
       {
         name: 'groupid',
@@ -56,7 +60,7 @@ const commands = [
       {
         name: 'rolenames',
         type: 3,
-        description: 'Group role names (comma separated)',
+        description: 'Role names (comma separated)',
         required: true
       },
       {
@@ -75,7 +79,7 @@ const commands = [
   },
   {
     name: 'blacklist',
-    description: 'Blacklist group management',
+    description: 'Manage blacklist',
     options: [
       {
         name: 'action',
@@ -93,34 +97,55 @@ const commands = [
   }
 ];
 
+// =========================
+// SAFE COMMAND DEPLOY
+// =========================
 const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
 
-// Register commands on startup
 (async () => {
   try {
     console.log('🔄 Registering slash commands...');
+
+    if (!process.env.CLIENT_ID) {
+      throw new Error('Missing CLIENT_ID in env');
+    }
 
     await rest.put(
       Routes.applicationCommands(process.env.CLIENT_ID),
       { body: commands }
     );
 
-    console.log('✅ Slash commands registered successfully');
+    console.log('✅ Slash commands registered');
   } catch (err) {
-    console.error('❌ Command registration error:', err);
+    console.error('❌ Command deploy error:', err);
   }
 })();
 
 // =========================
-// BOT READY
+// BOT READY (CRASH PROTECTION)
 // =========================
-
 client.once('ready', () => {
   console.log(`🤖 Logged in as ${client.user.tag}`);
 });
 
 // =========================
-// LOGIN
+// GLOBAL ERROR HANDLING (IMPORTANT)
 // =========================
+process.on('unhandledRejection', (err) => {
+  console.error('UNHANDLED REJECTION:', err);
+});
 
-client.login(process.env.TOKEN);
+process.on('uncaughtException', (err) => {
+  console.error('UNCAUGHT EXCEPTION:', err);
+});
+
+// =========================
+// LOGIN (CRASH SAFE)
+// =========================
+if (!process.env.TOKEN) {
+  console.error('❌ Missing TOKEN in environment variables');
+} else {
+  client.login(process.env.TOKEN).catch(err => {
+    console.error('LOGIN ERROR:', err);
+  });
+}
