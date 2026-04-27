@@ -1,6 +1,9 @@
-const update = require('../utils/updateRoles');
+const Verified = require('../models/Verified');
 
 module.exports = async (i) => {
-  await update(i.member);
-  i.reply({ content: 'Updated.', ephemeral: true });
+  const data = await Verified.findOne({ discordId: i.user.id });
+
+  if (!data) return i.editReply("Not verified.");
+
+  return i.editReply("Roles updated ✔ (hook your rankbind logic here)");
 };
