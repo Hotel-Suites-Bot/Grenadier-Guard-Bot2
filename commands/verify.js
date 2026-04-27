@@ -1,19 +1,25 @@
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const Verified = require('../models/Verified');
 const { getUserId } = require('../roblox');
+
+function generateCode() {
+  return 'BritishArmy-' + Math.floor(1000 + Math.random() * 9000);
+}
 
 module.exports = async (i) => {
   const username = i.options.getString('username');
-  const id = await getUserId(username);
-  if (!id) return i.reply({ content: 'Invalid username', ephemeral: true });
 
-  const embed = new EmbedBuilder()
-    .setTitle('Roblox Verification')
-    .setDescription('Click **Show Code**, put it in your Roblox bio, then click **Done**.');
+  const robloxId = await getUserId(username);
+  if (!robloxId) return i.editReply("User not found.");
 
-  const row = new ActionRowBuilder().addComponents(
-    new ButtonBuilder().setCustomId(`code_${id}`).setLabel('Show Code').setStyle(ButtonStyle.Primary),
-    new ButtonBuilder().setCustomId(`done_${id}`).setLabel('Done').setStyle(ButtonStyle.Success)
+  const code = generateCode();
+
+  await Verified.findOneAndUpdate(
+    { discordId: i.user.id },
+    { discordId: i.user.id, robloxId, username, code },
+    { upsert: true }
   );
 
-  i.reply({ embeds: [embed], components: [row], ephemeral: true });
+  return i.editReply(
+    `Put this in your Roblox bio:\n\n**${code}**\n\nThen run verify again.`
+  );
 };
