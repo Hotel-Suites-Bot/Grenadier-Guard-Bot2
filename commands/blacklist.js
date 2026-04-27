@@ -1,16 +1,9 @@
-const { Blacklist } = require('../db');
+const Blacklist = require('../models/Blacklist');
 
 module.exports = async (i) => {
-  const action = i.options.getString('action');
-  const gid = i.options.getString('groupid');
+  const groupId = i.options.getString('groupid');
 
-  if (action === 'add') {
-    await Blacklist.create({ groupId: gid });
-    return i.reply({ content: 'Added to blacklist', ephemeral: true });
-  }
+  await Blacklist.create({ groupId });
 
-  if (action === 'remove') {
-    await Blacklist.deleteOne({ groupId: gid });
-    return i.reply({ content: 'Removed from blacklist', ephemeral: true });
-  }
+  return i.editReply("Group blacklisted ✔");
 };
