@@ -1,22 +1,18 @@
-const { Rankbinds } = require('../db');
-const { RANKBIND_ROLE } = require('../config');
+const Rankbind = require('../models/Rankbind');
 
 module.exports = async (i) => {
-  if (!i.member.roles.cache.has(RANKBIND_ROLE)) {
-    return i.reply({ content: 'No permission', ephemeral: true });
-  }
-
-  const gid = i.options.getString('groupid');
-  const names = i.options.getString('rolenames').split(',').map(s => s.trim());
-  const roles = i.options.getString('roles').split(',').map(s => s.trim());
+  const groupId = i.options.getString('groupid');
+  const roleNames = i.options.getString('rolenames').split(',');
+  const roleIds = i.options.getString('roles').split(',');
   const nickname = i.options.getString('nickname');
 
-  await Rankbinds.create({
-    groupId: gid,
-    roleNames: names,
-    discordRoles: roles,
+  await Rankbind.create({
+    guildId: i.guild.id,
+    groupId,
+    roleNames,
+    roleIds,
     nickname
   });
 
-  i.reply({ content: 'Rankbind Added', ephemeral: true });
+  return i.editReply("Rankbind saved ✔");
 };
