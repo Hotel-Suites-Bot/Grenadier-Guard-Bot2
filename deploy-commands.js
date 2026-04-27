@@ -34,18 +34,48 @@ const commands = [
     name: 'rankbind',
     description: 'Create rankbind',
     options: [
-      { name: 'groupid', type: 3, required: true },
-      { name: 'rolenames', type: 3, required: true },
-      { name: 'roles', type: 3, required: true },
-      { name: 'nickname', type: 3, required: true }
+      {
+        name: 'groupid',
+        type: 3,
+        description: 'Roblox group ID',
+        required: true
+      },
+      {
+        name: 'rolenames',
+        type: 3,
+        description: 'Group role names (comma separated)',
+        required: true
+      },
+      {
+        name: 'roles',
+        type: 3,
+        description: 'Discord role IDs (comma separated)',
+        required: true
+      },
+      {
+        name: 'nickname',
+        type: 3,
+        description: 'Nickname format',
+        required: true
+      }
     ]
   },
   {
     name: 'blacklist',
     description: 'Manage blacklist',
     options: [
-      { name: 'action', type: 3, required: true },
-      { name: 'groupid', type: 3, required: true }
+      {
+        name: 'action',
+        type: 3,
+        description: 'add or remove',
+        required: true
+      },
+      {
+        name: 'groupid',
+        type: 3,
+        description: 'Roblox group ID',
+        required: true
+      }
     ]
   }
 ];
