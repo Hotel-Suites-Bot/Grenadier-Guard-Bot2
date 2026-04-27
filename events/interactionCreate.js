@@ -9,8 +9,6 @@ module.exports = (client) => {
     try {
       if (!i.isChatInputCommand()) return;
 
-      console.log("COMMAND:", i.commandName);
-
       await i.deferReply({ ephemeral: true });
 
       switch (i.commandName) {
@@ -28,17 +26,14 @@ module.exports = (client) => {
 
         case 'blacklist':
           return await blacklist(i);
-
-        default:
-          return i.editReply("Unknown command");
       }
 
     } catch (err) {
-      console.error("Interaction error:", err);
+      console.error(err);
 
       if (!i.replied) {
         await i.reply({
-          content: "Error occurred while running command.",
+          content: "Error occurred.",
           ephemeral: true
         });
       }
